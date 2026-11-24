@@ -226,3 +226,103 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 python -m uvicorn backend.main:app --reload
 ```
+## Running SkyScout on macOS
+
+Follow these steps to set up and run the SkyScout project on macOS.
+
+### Prerequisites
+
+- macOS (Intel or Apple Silicon)
+- Python 3 installed
+- Git
+- VS Code (recommended)
+
+### Step 1: Clone the Repository
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd SkyScout
+```
+
+### Step 2: Create a Virtual Environment
+
+```bash
+python3 -m venv .venv
+```
+
+### Step 3: Activate the Virtual Environment
+
+```bash
+source .venv/bin/activate
+```
+
+### Step 4: Upgrade pip
+
+```bash
+python -m pip install --upgrade pip
+```
+
+### Step 5: Install Dependencies
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+### Step 6: Run Tests
+
+```bash
+python -m pytest -q
+```
+
+### Step 7: Start the FastAPI Server
+
+```bash
+python -m uvicorn backend.main:app --reload
+```
+
+### Step 8: Access the Application
+
+Once the server starts successfully, open:
+
+- **API:** http://127.0.0.1:8000
+- **Swagger Documentation:** http://127.0.0.1:8000/docs
+- **ReDoc Documentation:** http://127.0.0.1:8000/redoc
+
+### Deactivate the Virtual Environment
+
+After finishing your work, run:
+
+```bash
+deactivate
+```
+
+### Troubleshooting
+
+**If Python is not installed:**
+
+Install Python 3 using Homebrew:
+
+```bash
+brew install python
+```
+
+**If pytest is missing:**
+
+```bash
+python -m pip install pytest
+```
+
+**If Uvicorn is missing:**
+
+```bash
+python -m pip install uvicorn
+```
+
+**If you encounter permission issues while activating the environment:**
+
+```bash
+chmod +x .venv/bin/activate
+source .venv/bin/activate
+```
+
+**Note:** Always activate the virtual environment before installing dependencies or running the application.
