@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkyScout AI - Autonomous Travel Platform</title>
+  <meta name="description" content="SkyScout is a multi-view autonomous travel platform with round-trip planning, utility tuning, agent trace inspection, lexical preference memory, simulated fare watching and grounded briefings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=3">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M14 6l6 6-6 6"/><path d="M6 7.5l2.5 4.5L6 16.5"/></svg>
+        </div>
+        <div>
+          <p class="brand-name">Sky<span>Scout</span></p>
+          <p class="brand-sub">Autonomous AI</p>
+        </div>
+      </div>
+
+      <p class="nav-label">Workspace</p>
+      <nav class="sidebar-nav" role="tablist" aria-label="Workspace views" aria-orientation="vertical">
+        <button type="button" id="search" class="nav-item active" role="tab" aria-selected="true" aria-controls="view-search" data-view="search">
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+          <span class="nav-text">Flight Search</span><span class="nav-badge" id="badge-search">0</span>
+        </button>
+        <button type="button" id="trace" class="nav-item" role="tab" aria-selected="false" aria-controls="view-trace" data-view="trace">
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-7"/></svg></span>
+          <span class="nav-text">Agent Trace</span><span class="nav-badge" id="badge-trace">0</span>
+        </button>
+        <button type="button" id="memory" class="nav-item" role="tab" aria-selected="false" aria-controls="view-memory" data-view="memory">
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12l-4-2-4 2-4-2-4 2V7z"/></svg></span>
+          <span class="nav-text">Memory Studio</span><span class="nav-badge" id="badge-memory">0</span>
+        </button>
+        <button type="button" id="briefing" class="nav-item" role="tab" aria-selected="false" aria-controls="view-briefing" data-view="briefing">
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-3-6 3V3z"/><path d="M9 8h6"/><path d="M9 12h6"/></svg></span>
+          <span class="nav-text">Briefing & Audit</span><span class="nav-badge" id="badge-briefing">0</span>
+        </button>
+      </nav>
+
+    </aside>
+
+    <main id="main-content" class="main-content" tabindex="-1">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow" id="viewEyebrow">Agentic AI Travel Workspace</p>
+          <h1 id="viewHeading">Plan your next <span class="accent">trip</span>.</h1>
+          <p class="lede" id="viewLede">Search one-way or round-trip itineraries, tune utility weights live, and inspect every agent decision before you brief.</p>
+        </div>
+        <div class="header-status">
+          <span class="status-pill"><span class="dot" aria-hidden="true"></span><span id="systemStatusText">Ready</span></span>
+          <span class="mode-pill" id="extractorModePill">ReAct: deterministic</span>
+        </div>
+      </header>
+
+      <section id="view-search" class="view active" role="tabpanel" aria-labelledby="search">
+        <div class="search-layout">
+          <div class="panel form-panel">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">Perception & Planning</p>
+                <h2>Plan your trip</h2>
+                <p class="panel-sub">Use natural language or structured fields. Both paths run through the same agent pipeline.</p>
+              </div>
+            </div>
+
+            <form id="searchForm" novalidate>
+              <div class="trip-toggle" role="group" aria-label="Trip type">
+                <button type="button" id="oneWayBtn" class="trip-option active" aria-pressed="true">One-Way</button>
+                <button type="button" id="roundTripBtn" class="trip-option" aria-pressed="false">Round-Trip</button>
+              </div>
+              <input type="hidden" id="tripType" name="tripType" value="one_way">
+
+              <div class="field">
+                <label for="query">Natural-language request <span class="label-hint">(optional)</span></label>
+                <textarea id="query" name="query" rows="2" maxlength="1000" placeholder="Example: Round trip from Pune to Singapore on 2026-12-18 returning 2026-12-24 under 45000, no red-eye, email demo@example.com"></textarea>
+                <p class="field-help">Try relative dates, INR/USD/SGD budgets and round-trip phrases. Agents resolve the rest.</p>
+                <p id="queryParseNote" class="parse-note" aria-live="polite"></p>
+              </div>
+
+              <div class="route-row">
+                <div class="field">
+                  <label for="origin">From <span class="req" aria-hidden="true">*</span></label>
+                  <select id="origin" name="origin" required>
+                    <option value="">Origin city</option>
+                    <option value="Pune">Pune (PNQ)</option>
+                    <option value="Mumbai">Mumbai (BOM)</option>
+                    <option value="Delhi">Delhi (DEL)</option>
+                    <option value="Singapore">Singapore (SIN)</option>
+                  </select>
+                  <p id="originError" class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="swap-wrap">
+                  <button type="button" id="swapBtn" class="swap-btn" aria-label="Swap origin and destination" title="Swap cities">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg>
+                  </button>
+                </div>
+                <div class="field">
+                  <label for="destination">To <span class="req" aria-hidden="true">*</span></label>
+                  <select id="destination" name="destination" required>
+                    <option value="">Destination city</option>
+                    <option value="Pune">Pune (PNQ)</option>
+                    <option value="Mumbai">Mumbai (BOM)</option>
+                    <option value="Delhi">Delhi (DEL)</option>
+                    <option value="Singapore">Singapore (SIN)</option>
+                  </select>
+                  <p id="destinationError" class="field-error" aria-live="polite"></p>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field">
+                  <label for="date">Departure date <span class="req" aria-hidden="true">*</span></label>
+                  <input id="date" name="date" type="date" required>
+                  <p id="dateError" class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="field" id="returnField">
+                  <label for="returnDate">Return date <span class="label-hint" id="returnHint">(optional)</span></label>
+                  <input id="returnDate" name="returnDate" type="date">
+                  <p id="returnDateError" class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="field">
+                  <label for="budget">Max budget (INR) <span class="req" aria-hidden="true">*</span></label>
+                  <input id="budget" name="budget" type="number" min="1" max="10000000" step="1" inputmode="numeric" placeholder="e.g. 45000" required>
+                  <p id="budgetError" class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="field">
+                  <label for="persona">Utility profile</label>
+                  <select id="persona" name="persona">
+                    <option value="balanced">Balanced Utility</option>
+                    <option value="budget">Budget Saver</option>
+                    <option value="fastest">Fastest Direct</option>
+                    <option value="comfort">Comfort First</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field email-field">
+                <label for="email">Email for verified briefing <span class="req" aria-hidden="true">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+                <p id="emailError" class="field-error" aria-live="polite"></p>
+              </div>
+
+              <details class="tuner" id="tunerDetails">
+                <summary><span>Interactive Utility Weight Tuner</span><span class="tuner-summary" id="tunerSummary">Price 40% · Speed 30% · Comfort 20% · Timing 10%</span></summary>
+                <div class="tuner-body">
+                  <div class="slider-row">
+                    <label for="weightPrice">Price <output id="priceOut">40%</output></label>
+                    <input type="range" id="weightPrice" min="0" max="100" value="40">
+                  </div>
+                  <div class="slider-row">
+                    <label for="weightSpeed">Speed <output id="speedOut">30%</output></label>
+                    <input type="range" id="weightSpeed" min="0" max="100" value="30">
+                  </div>
+                  <div class="slider-row">
+                    <label for="weightComfort">Comfort <output id="weightComfortOut">20%</output></label>
+                    <input type="range" id="weightComfort" min="0" max="100" value="20">
+                  </div>
+                  <div class="slider-row">
+                    <label for="weightTiming">Timing <output id="timingOut">10%</output></label>
+                    <input type="range" id="weightTiming" min="0" max="100" value="10">
+                  </div>
+                  <p class="field-help">Sliders re-normalize to 100% and re-rank the current results instantly — no new search required.</p>
+                  <button type="button" class="btn btn-text" id="resetWeightsBtn">Reset to balanced weights</button>
+                </div>
+              </details>
+
+              <div class="prefs-box">
+                <div class="toggle-row">
+                  <div class="toggle-copy">
+                    <label class="toggle-label" for="reuseMemory">Use saved preferences</label>
+                    <p class="toggle-desc" id="reuseMemoryHelp">Recall structured slots and preference rules from memory.</p>
+                  </div>
+                  <label class="switch" for="reuseMemory"><input id="reuseMemory" type="checkbox" checked><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-copy">
+                    <label class="toggle-label" for="saveMemory">Remember my preferences</label>
+                    <p class="toggle-desc">Persist slots and behavioral notes for future sessions.</p>
+                  </div>
+                  <label class="switch" for="saveMemory"><input id="saveMemory" type="checkbox"><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span></label>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button id="searchBtn" class="btn btn-primary" type="submit"><span>Find flights</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+                <button id="sampleBtn" class="btn btn-secondary" type="button">Sample round trip</button>
+                <button id="replanDemoBtn" class="btn btn-secondary" type="button">Test ToT replan</button>
+                <button id="guardrailDemoBtn" class="btn btn-secondary" type="button">Test guardrails</button>
+                <button id="resetBtn" class="btn btn-ghost" type="button">Reset</button>
+              </div>
+            </form>
+            <div id="messageRegion" class="message-region" aria-live="polite" aria-atomic="true"></div>
+          </div>
+
+          <div class="results-column">
+            <section class="panel results-panel" aria-labelledby="results-title">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Verified Output</p>
+                  <h2 id="results-title">Utility-ranked itineraries</h2>
+                  <p class="panel-sub">Scored, negotiated and grounded against source inventory.</p>
+                </div>
+                <div id="resultsMeta" class="results-meta" aria-live="polite"></div>
+              </div>
+              <div id="kpiStrip" class="kpi-strip" aria-live="polite"></div>
+              <div id="compareBar" class="compare-bar" aria-live="polite">
+                <span id="compareHint">Check Compare on 2+ flights for a side-by-side breakdown.</span>
+                <button type="button" id="clearCompareBtn" class="btn btn-ghost btn-sm" disabled>Clear comparison</button>
+              </div>
+              <div id="compareCard" class="compare-card" aria-live="polite" hidden></div>
+              <div id="resultsContent" class="results-content" aria-live="polite"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-trace" class="view" role="tabpanel" aria-labelledby="trace" hidden>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Agent Reasoning &amp; Protocol</p>
+              <h2>Agent Trace, ReAct &amp; ACL Inspector</h2>
+              <p class="panel-sub">Follow the seven-stage pipeline and inspect the reasoning behind each recommendation.</p>
+            </div>
+            <div class="view-switch" role="group" aria-label="Trace detail level">
+              <button type="button" id="traceSimpleBtn" class="view-switch-btn active" aria-pressed="true">Simple view</button>
+              <button type="button" id="traceTechnicalBtn" class="view-switch-btn" aria-pressed="false">Technical view</button>
+            </div>
+          </div>
+          <div id="pipelineStrip" class="pipeline-strip" aria-live="polite"></div>
+          <div id="traceSummary" class="trace-summary" aria-live="polite"></div>
+        </section>
+
+        <div class="details-grid trace-grid">
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Reasoning Loop</p><h3>ReAct Reasoning Cards</h3></div><span id="reactMode" class="mini-badge">No extraction yet</span></div>
+            <div id="reactCards" class="stack" aria-live="polite"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Dynamic Replanner</p><h3>Tree-of-Thought Branch Evaluator</h3></div><span id="totSummary" class="mini-badge">Not triggered</span></div>
+            <div id="totBranches" class="stack" aria-live="polite"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head compact">
+            <div><p class="panel-kicker">Inter-Agent Protocol</p><h3>FIPA-ACL Style Message Log</h3></div>
+            <span id="aclCount" class="mini-badge">0 messages</span>
+          </div>
+          <div id="aclSimple" class="acl-timeline" aria-live="polite"></div>
+          <div id="aclTechnical" class="table-wrap" hidden>
+            <table class="data-table" id="aclTable">
+              <thead><tr><th>#</th><th>Time</th><th>Sender</th><th>Receiver</th><th>Performative</th><th>Status</th><th>Confidence</th><th>Message</th><th>Payload keys</th></tr></thead>
+              <tbody id="aclBody"></tbody>
+            </table>
+          </div>
+          <details class="raw-json">
+            <summary>Raw agent trace JSON</summary>
+            <pre id="traceRaw"></pre>
+          </details>
+        </section>
+      </section>
+
+      <section id="view-memory" class="view" role="tabpanel" aria-labelledby="memory" hidden>
+        <div class="details-grid">
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Active Session Context</p><h3>Short-Term Working Memory</h3></div></div>
+            <div id="workingMemory" class="stack" aria-live="polite"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Persistent Preference Store</p><h3>Preference Rules</h3></div></div>
+            <div class="memory-status-row">
+              <span id="memoryStatus" class="mini-badge">Memory not saved</span>
+              <span id="memoryStatusDetail" class="field-help">No persistent file for this session.</span>
+            </div>
+            <p class="panel-sub">Rules are ranked with token-frequency cosine similarity over lexical preference text. This is word-overlap similarity, not semantic understanding.</p>
+            <form id="noteForm" class="inline-form">
+              <input id="noteInput" type="text" maxlength="300" placeholder="Add a natural-language preference rule" aria-label="Preference rule">
+              <button type="submit" id="noteSubmitBtn" class="btn btn-primary btn-sm">Save rule</button>
+              <button type="button" id="cancelNoteEditBtn" class="btn btn-text btn-sm" hidden>Cancel</button>
+            </form>
+            <p id="noteError" class="inline-error" aria-live="polite"></p>
+            <div id="semanticMemory" class="stack" aria-live="polite"></div>
+            <div class="subhead"><p class="panel-kicker">Structured Preferences</p><h4>Editable slots</h4></div>
+            <form id="preferenceForm" class="inline-form">
+              <select id="prefKey" aria-label="Preference field">
+                <option value="origin">Origin</option>
+                <option value="destination">Destination</option>
+                <option value="date">Departure date</option>
+                <option value="return_date">Return date</option>
+                <option value="budget">Budget</option>
+                <option value="email">Email</option>
+                <option value="persona">Persona</option>
+              </select>
+              <input id="prefValue" type="text" maxlength="300" placeholder="New value" aria-label="Preference value">
+              <button type="submit" id="savePreferenceBtn" class="btn btn-secondary btn-sm">Save</button>
+            </form>
+            <p id="preferenceError" class="inline-error" aria-live="polite"></p>
+            <div id="structuredMemory" class="stack" aria-live="polite"></div>
+            <div class="card-footer"><button type="button" id="clearMemoryBtn" class="btn btn-text">Clear all memory</button></div>
+          </section>
+        </div>
+
+        <section class="panel watcher-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Simulated Monitoring Only</p>
+              <h2>Fare & Disruption Watcher</h2>
+              <p class="panel-sub">Save a route threshold, then simulate a local market drop to see the Watcher Agent detect, re-rank and verify a demo alert. No live airline monitoring is performed.</p>
+            </div>
+            <span class="mini-badge" id="watchStatus">No rule saved</span>
+          </div>
+          <p id="watchModeNote" class="simulation-note">Simulation only: alerts use the bundled demo inventory and never represent live fares or active monitoring.</p>
+          <form id="watchForm" class="watch-form">
+            <div class="field"><label for="watchOrigin">Route from</label><select id="watchOrigin"><option value="">City</option><option>Pune</option><option>Mumbai</option><option>Delhi</option><option>Singapore</option></select></div>
+            <div class="field"><label for="watchDestination">Route to</label><select id="watchDestination"><option value="">City</option><option>Pune</option><option>Mumbai</option><option>Delhi</option><option>Singapore</option></select></div>
+            <div class="field"><label for="watchThreshold">Target fare (INR)</label><input id="watchThreshold" type="number" min="1" max="10000000" placeholder="e.g. 20000"></div>
+            <div class="field"><label for="watchDate">Travel date</label><input id="watchDate" type="date"></div>
+          </form>
+          <p id="watchValidation" class="inline-error" aria-live="polite"></p>
+          <div class="watch-actions">
+            <button type="button" id="saveWatchBtn" class="btn btn-secondary" disabled>Save watch rule</button>
+            <button type="button" id="simulateWatchBtn" class="btn btn-primary">Simulate demo price drop</button>
+          </div>
+          <div id="watchResult" class="watch-result" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section id="view-briefing" class="view" role="tabpanel" aria-labelledby="briefing" hidden>
+        <div class="details-grid">
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Adversarial Guardrails</p><h3>Defense-in-Depth Guardrail Report</h3></div><span id="riskBadge" class="mini-badge">Not scanned</span></div>
+            <div id="guardrailReport" class="stack" aria-live="polite"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head compact"><div><p class="panel-kicker">Factual Grounding Audit</p><h3>Grounding audit checklist</h3></div><span id="groundingBadge" class="mini-badge">0%</span></div>
+            <div id="groundingChecklist" class="stack" aria-live="polite"></div>
+          </section>
+        </div>
+
+        <section class="panel briefing-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Briefing & Audit</p>
+              <h2>Itinerary Briefing</h2>
+              <p class="panel-sub">Structured from current itinerary data and session preferences. Status reflects verification evidence; all watcher data is simulated.</p>
+            </div>
+            <div class="briefing-actions no-print">
+              <button type="button" id="copyBriefingBtn" class="btn btn-secondary" title="Copy the readable briefing text">Copy briefing</button>
+              <button type="button" id="printBriefingBtn" class="btn btn-secondary" title="Open the generated PDF for printing">Print PDF</button>
+              <button type="button" id="downloadDossierBtn" class="btn btn-primary" title="Download the PDF travel dossier">Download PDF dossier</button>
+            </div>
+          </div>
+          <div id="briefingStatus" class="mini-badge">No briefing generated yet</div>
+          <div id="briefingLoading" class="loading-indicator" role="status" aria-live="polite" hidden>Generating PDF dossier…</div>
+          <div id="briefingError" class="inline-error" aria-live="polite"></div>
+          <div id="structuredBriefing" class="structured-briefing" aria-live="polite"></div>
+          <div id="selectedItinerary" class="selection-card" aria-live="polite" hidden></div>
+          <div class="email-card">
+            <div id="briefingMeta" class="email-meta"></div>
+            <div class="email-divider"></div>
+            <div id="briefingBody" class="email-body"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head compact"><div><p class="panel-kicker">Audit Certificate</p><h3>Verification Summary</h3></div><span id="certificateStatus" class="mini-badge">PENDING</span></div>
+          <div id="auditCertificate" class="stack" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <p><strong>SkyScout AI</strong> — Autonomous Multi-Agent Flight Planning Platform.</p>
+        <p>Demo inventory only. Always confirm live airline availability before ticketing.</p>
+      </footer>
+    </main>
+  </div>
+
+  <div id="printDossier" class="print-dossier" hidden></div>
+  <script src="/app.js?v=3" defer></script>
+</body>
+</html>
